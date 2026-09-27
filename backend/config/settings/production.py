@@ -28,6 +28,10 @@ DATABASES = {
 # FICHIERS STATIQUES (WHITENOISE)
 # ==============================================================================
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 
 # Tout à la fin du fichier production.py
 import sentry_sdk 
