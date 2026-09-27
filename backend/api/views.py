@@ -88,3 +88,10 @@ def task_detail(request, pk):
     # DELETE
     task.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def trigger_error(request):
+    """Une vue conçue pour créer une erreur 500."""
+    # Cette ligne va inévitablement provoquer une erreur
+    division_by_zero = 1 / 0
+    return JsonResponse({"this": "will never be returned"})
