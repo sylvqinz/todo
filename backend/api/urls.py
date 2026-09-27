@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 # Routes de l'API REST pour les catégories et les tâches
 urlpatterns = [
     path("categories/", views.category_list_create, name="category-list-create"),

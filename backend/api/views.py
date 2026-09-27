@@ -3,7 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Category, Task
 from .serializers import CategorySerializer, TaskSerializer
+from django.http import JsonResponse
 
+def health_check(request):
+    """Une vue simple qui renvoie un statut de succès."""
+    return JsonResponse({"status": "ok", "message": "API is healthy"})
 
 # GET  /api/categories/ : liste toutes les catégories
 # POST /api/categories/ : crée une nouvelle catégorie
