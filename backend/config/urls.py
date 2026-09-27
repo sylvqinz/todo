@@ -16,12 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from api.views import health_check
+from api.views import health_check, trigger_error
 
 # URLs principales : admin Django + inclusion des routes de l'API
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health_check, name="health_check"),
     path("api/", include("api.urls")),
-     
+    path('error/', trigger_error, name='trigger_error'), # Ajoutez la route de test
 ]
