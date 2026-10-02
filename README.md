@@ -1,52 +1,45 @@
-## Structure du projet
+# Todo List React + Django
 
-```
-React-TP/
-├── back/                 # API Django REST
-│   ├── api/              # App principale (models, views, serializers)
-│   ├── config/           # Configuration Django (settings, urls)
-│   ├── db.sqlite3        # Base de données SQLite
+Application de gestion de tâches par catégories, composée d'un frontend React et d'une API REST Django.
+
+## Stack technique
+
+| Couche | Technologies |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS 4 |
+| Backend | Django 6, Django REST Framework, Gunicorn, WhiteNoise |
+| Base de données | SQLite en local, PostgreSQL Supabase en production |
+| Déploiement | Vercel (frontend), Render (backend) |
+| Monitoring | Render Health Check, UptimeRobot, Sentry |
+
+## Structure
+
+```text
+React-Django/
+├── backend/              # API Django REST
+│   ├── api/              # Modèles, sérialiseurs, vues et routes API
+│   ├── config/           # URLs et settings development/production
 │   ├── manage.py
 │   └── requirements.txt
-└── front/                # Application React + Vite + TypeScript
+└── frontend/             # Application React + Vite
+    ├── public/
     ├── src/
-    │   ├── components/   # Composants React (Todo, TaskForm, TaskList, CategoryForm)
-    │   ├── services/     # Client API (apiClient.ts)
-    │   └── index.css     # Styles Tailwind CSS
-    ├── .env              # Variable VITE_API_BASE_URL
+    │   ├── components/   # Todo, formulaires et liste des tâches
+    │   └── services/     # Client API typé
+    ├── .env.example
     ├── package.json
     └── vite.config.ts
 ```
 
-## Stack technique
-
-| Couche   | Technologies                                      |
-|----------|---------------------------------------------------|
-| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS 4      |
-| Backend  | Django 6, Django REST Framework, django-cors-headers |
-| Base de données | SQLite                                      |
-
 ## Fonctionnalités
 
-- Créer, lister et supprimer des **catégories**
-- Créer, lister, compléter et supprimer des **tâches**
-- Filtrer les tâches par catégorie via un menu déroulant
-- Validation des formulaires avec affichage des erreurs du backend
-- Suppression en cascade (supprimer une catégorie supprime ses tâches)
+- Créer, afficher et supprimer des catégories
+- Créer, afficher, terminer et supprimer des tâches
+- Filtrer les tâches par catégorie
+- Afficher les erreurs de validation renvoyées par l'API
+- Supprimer en cascade les tâches d'une catégorie
 
-## API REST
-
-| Méthode | Endpoint               | Description                          |
-|---------|------------------------|--------------------------------------|
-| GET     | /api/categories/       | Liste toutes les catégories          |
-| POST    | /api/categories/       | Crée une catégorie                   |
-| DELETE  | /api/categories/:id/   | Supprime une catégorie (+ ses tâches)|
-| GET     | /api/tasks/            | Liste toutes les tâches              |
-| POST    | /api/tasks/            | Crée une tâche                       |
-| PATCH   | /api/tasks/:id/        | Met à jour une tâche (ex: compléter) |
-| DELETE  | /api/tasks/:id/        | Supprime une tâche                   |
-
-## Installation et lancement
+## Installation locale
 
 ### Backend
 
@@ -59,30 +52,83 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-python -m venv env
-.env/Scripts/activate
-
-Le serveur Django démarre sur `http://localhost:8000`.
+Le backend local utilise SQLite et répond sur `http://localhost:8000`.
 
 ### Frontend
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-Le serveur Vite démarre sur `http://localhost:5173`.
+Le frontend répond par défaut sur `http://localhost:5173`.
 
-## Architecture frontend
+Variables locales dans `frontend/.env` :
 
-```
-App
-└── Todo              # Orchestrateur principal (état global, fetch initial)
-    ├── CategoryForm  # Formulaire de création de catégorie
-    ├── TaskForm      # Formulaire de création de tâche (avec sélection de catégorie)
-    └── TaskList      # Liste des tâches, filtrage par catégorie, toggle/suppression
+```env
+VITE_API_BASE_URL=http://localhost:8000/api
+VITE_SENTRY_DSN=
 ```
 
-- **Todo** gère l'état centralisé (`categories`, `tasks`) et le transmet aux enfants via props
-- **apiClient.ts** centralise toutes les requêtes HTTP avec gestion d'erreurs typée (`ApiError`)
+Les fichiers `.env` sont ignorés par Git. Seuls les fichiers `.env.example`, sans secret, doivent être versionnés.
+
+## API REST
+
+| Méthode | Endpoint | Description |
+| --- | --- | --- |
+| GET, POST | `/api/categories/` | Lister ou créer les catégories |
+| DELETE | `/api/categories/:id/` | Supprimer une catégorie et ses tâches |
+| GET, POST | `/api/tasks/` | Lister ou créer les tâches |
+| PATCH, DELETE | `/api/tasks/:id/` | Modifier ou supprimer une tâche |
+| GET | `/health/` | Vérifier la disponibilité du backend |
+
+## Déploiement
+
+### Render
+
+Variables d'environnement du backend :
+
+```env
+DJANGO_SETTINGS_MODULE=config.settings.production
+SECRET_KEY=...
+DATABASE_URL=postgresql://...
+ALLOWED_HOSTS=votre-api.onrender.com
+CORS_ALLOWED_ORIGINS=https://votre-frontend.vercel.app
+SENTRY_DSN=...
+```
+
+Commandes recommandées :
+
+```bash
+pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+gunicorn config.wsgi:application
+```
+
+Le Health Check Render et UptimeRobot peuvent utiliser `/health/`.
+
+### Vercel
+
+Variables d'environnement du frontend :
+
+```env
+VITE_API_BASE_URL=https://votre-api.onrender.com/api
+VITE_SENTRY_DSN=...
+```
+
+Pour envoyer les source maps à Sentry pendant le build, ajouter également `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` et `SENTRY_PROJECT` dans Vercel.
+
+## Qualité
+
+```bash
+cd frontend
+npm run lint
+npm run build
+npm audit
+
+cd ../backend
+python manage.py check
+```
+
+Les routes et composants qui provoquent volontairement une erreur Sentry (`/error/` et `TestComponent`) sont destinés uniquement à la validation du monitoring et doivent être retirés après les captures de preuve.
