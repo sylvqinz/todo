@@ -39,8 +39,16 @@ function Todo() {
         Ma To-Do List par catégories
       </h1>
 
-      {loading && <p className="text-center text-gray-500 italic">Chargement...</p>}
-      {error && <p className="text-center text-red-500 font-medium">{error}</p>}
+      {loading && (
+        <p className="text-center text-gray-500 italic" aria-live="polite">
+          Chargement...
+        </p>
+      )}
+      {error && (
+        <p className="text-center text-red-500 font-medium" role="alert">
+          {error}
+        </p>
+      )}
 
       <CategoryForm
         onCategoryCreated={(cat) => setCategories((prev) => [...prev, cat])}
