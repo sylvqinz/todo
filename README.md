@@ -119,7 +119,7 @@ VITE_SENTRY_DSN=...
 
 Pour envoyer les source maps à Sentry pendant le build, ajouter également `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` et `SENTRY_PROJECT` dans Vercel.
 
-## Qualité
+## Vérifications avant déploiement
 
 ```bash
 cd frontend
